@@ -1,0 +1,3 @@
+[submodule "MyPackage"]
+	path = MyPackage
+	url = https://github.com/simoncourtois-cs50/MyPackage.git
