@@ -173,11 +173,12 @@ public class BuildManagerWindow : EditorWindow
     }
     private void UpdateDisplayedVersion()
     {
-        _currentVersion = GitUtility.GetTag();
-        string[] versionsNumber = _currentVersion.Split(".");
+        string tag = GitUtility.GetTag();
+        string[] versionsNumber = tag.Split(".");
         _major = versionsNumber[0];
         _minor = versionsNumber[1];
-        _patch = versionsNumber[2];
+        _patch = versionsNumber[2][0].ToString();
+        _currentVersion = $"{_major}.{_minor}.{_patch}";
 
         _majorNumber = Int32.Parse(_major);
         _minorNumber = Int32.Parse(_minor);
