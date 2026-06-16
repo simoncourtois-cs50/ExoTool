@@ -1,7 +1,6 @@
-
-using GluonGui.WorkspaceWindow.Views.WorkspaceExplorer.Explorer;
 using System;
 using System.Diagnostics;
+using UnityEngine.PlayerLoop;
 
 public static class GitUtility
 {
@@ -43,10 +42,21 @@ public static class GitUtility
 
     public static string GetStatus()
     {
-        return RunCommand("status --porcelain");
+        string output = RunCommand("status --porcelain");
+        string status = output == "" ? "Up to Date" : "Waiting commit";
+        return status;
+
     }
     public static string GetTag()
     {
         return RunCommand("describe --tags");
+    }
+    public static void SetTag(string version)
+    {
+        RunCommand($"tag {version}");
+    }
+    public static string GetCommit()
+    {
+        return RunCommand("rev-parse HEAD");
     }
 }

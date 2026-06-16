@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -8,13 +10,16 @@ public class BuildManagerWindow : EditorWindow
     [MenuItem("Tools/BuildManagerWindow")]
     public static void ShowWindow()
     {
-        BuildManagerWindow window = GetWindow<BuildManagerWindow>();
+        BuildManagerWindow window = GetWindow<BuildManagerWindow>("Build Manager");
         window.titleContent = new GUIContent("Build Manager");
-        
+        window.minSize = new Vector2(300, 400);
+        window.Show();
     }
 
     public void CreateGUI()
     {
+        UpdateDisplayedVersion();
+
         VisualElement root = rootVisualElement;
 
         //VERSION
@@ -22,31 +27,117 @@ public class BuildManagerWindow : EditorWindow
         root.Add(_versionTitle);
 
         //Major
-        root.Add(new Label("Major"));
-        _majorField = new TextField { value = _major };
-        _majorField.RegisterValueChangedCallback(evt =>
+
+        VisualElement horizontalGroupMajor = new VisualElement();
+        horizontalGroupMajor.style.flexDirection = FlexDirection.Row;
+
+        Label majorLabel = new Label("Major");
+        majorLabel.style.flexGrow = 2;
+        horizontalGroupMajor.Add(majorLabel);
+
+        Label majorNumberLabel = new Label(_majorNumber.ToString());
+        majorNumberLabel.style.flexGrow = 2;
+        horizontalGroupMajor.Add(majorNumberLabel);
+
+        Button incrementButton = new Button();
+        incrementButton.name = "+";
+        incrementButton.text = "+";
+        incrementButton.style.flexGrow = 1;
+        incrementButton.clicked += () =>
         {
-            _major = evt.newValue;
-        });
-        root.Add(_majorField);
+            _majorNumber++;
+            majorNumberLabel.text = _majorNumber.ToString();
+            
+        };
+        horizontalGroupMajor.Add(incrementButton);
+
+        Button decrementButton = new Button();
+        decrementButton.name = "-";
+        decrementButton.text = "-";
+        decrementButton.style.flexGrow = 1;
+        decrementButton.clicked += () =>
+        {
+            _majorNumber--;
+            _majorNumber = _majorNumber < Int32.Parse(_major) ? Int32.Parse(_major) : _majorNumber;
+            majorNumberLabel.text = _majorNumber.ToString();
+        };
+        horizontalGroupMajor.Add(decrementButton);
+
+        root.Add(horizontalGroupMajor);
 
         //Minor
-        root.Add(new Label("Minor"));
-        _minorField = new TextField { value = _minor };
-        _minorField.RegisterValueChangedCallback(evt =>
+        VisualElement horizontalGroupMinor = new VisualElement();
+        horizontalGroupMinor.style.flexDirection = FlexDirection.Row;
+
+        Label minorLabel = new Label("Minor");
+        minorLabel.style.flexGrow = 2;
+        horizontalGroupMinor.Add(minorLabel);
+
+        Label minorNumberLabel = new Label(_majorNumber.ToString());
+        minorNumberLabel.style.flexGrow = 2;
+        horizontalGroupMinor.Add(minorNumberLabel);
+
+        Button incrementButtonMinor = new Button();
+        incrementButtonMinor.name = "+";
+        incrementButtonMinor.text = "+";
+        incrementButtonMinor.style.flexGrow = 1;
+        incrementButtonMinor.clicked += () =>
         {
-            _minor = evt.newValue;
-        });
-        root.Add(_minorField);
+            _minorNumber++;
+            minorNumberLabel.text = _minorNumber.ToString();
+        };
+        horizontalGroupMinor.Add(incrementButtonMinor);
+
+        Button decrementButtonMinor = new Button();
+        decrementButtonMinor.name = "-";
+        decrementButtonMinor.text = "-";
+        decrementButtonMinor.style.flexGrow = 1;
+        decrementButtonMinor.clicked += () =>
+        {
+            _minorNumber--;
+            _minorNumber = _minorNumber < Int32.Parse(_minor) ? Int32.Parse(_minor) : _minorNumber;
+            minorNumberLabel.text = _minorNumber.ToString();
+        };
+        horizontalGroupMinor.Add(decrementButtonMinor);
+
+        root.Add(horizontalGroupMinor);
 
         //Patch
-        root.Add(new Label("Patch"));
-        _patchField = new TextField { value = _patch };
-        _patchField.RegisterValueChangedCallback(evt =>
+        VisualElement horizontalGroupPatch = new VisualElement();
+        horizontalGroupPatch.style.flexDirection = FlexDirection.Row;
+
+        Label patchLabel = new Label("Patch");
+        patchLabel.style.flexGrow = 2;
+        horizontalGroupPatch.Add(patchLabel);
+
+        Label patchNumberLabel = new Label(_patchNumber.ToString());
+        patchNumberLabel.style.flexGrow = 2;
+        horizontalGroupPatch.Add(patchNumberLabel);
+
+        Button incrementButtonPatch = new Button();
+        incrementButtonPatch.name = "+";
+        incrementButtonPatch.text = "+";
+        incrementButtonPatch.style.flexGrow = 1;
+        incrementButtonPatch.clicked += () =>
         {
-            _patch = evt.newValue;
-        });
-        root.Add(_patchField);
+            _patchNumber++;
+            patchNumberLabel.text = _patchNumber.ToString();
+        };
+        horizontalGroupPatch.Add(incrementButtonPatch);
+
+        Button decrementButtonPatch = new Button();
+        decrementButtonPatch.name = "-";
+        decrementButtonPatch.text = "-";
+        decrementButtonPatch.style.flexGrow = 1;
+        decrementButtonPatch.clicked += () =>
+        {
+            _patchNumber--;
+            _patchNumber = _patchNumber < Int32.Parse(_patch) ? Int32.Parse(_patch) : _patchNumber;
+            patchNumberLabel.text = _patchNumber.ToString();
+        };
+        horizontalGroupPatch.Add(decrementButtonPatch);
+
+        root.Add(horizontalGroupPatch);
 
         //Update Button
         Button updateButton = new Button();
@@ -70,22 +161,35 @@ public class BuildManagerWindow : EditorWindow
         _version = $"v{_major}.{_minor}.{_patch}";
         Debug.Log(GitUtility.GetStatus());
     }
+    private void UpdateDisplayedVersion()
+    {
+        _version = GitUtility.GetTag();
+        string[] versionsNumber = _version.Split(".");
+        _major = versionsNumber[0];
+        _minor = versionsNumber[1];
+        _patch = versionsNumber[2];
+        _branch = GitUtility.GetBranch();
+        _commit = GitUtility.GetCommit();
+        _status = GitUtility.GetStatus();
+      
+    }
 
     #region Private and Protected
 
-    private TextField _majorField;
-    private TextField _minorField;
-    private TextField _patchField;
-
-    private string _major;
-    private string _minor;
-    private string _patch;
     private string _version;
     private Label _versionTitle;
     private string _branch;
     private string _tag;
     private string _commit;
     private string _status;
+
+    private string _major;
+    private string _minor;
+    private string _patch;
+
+    private int _majorNumber;
+    private int _minorNumber;
+    private int _patchNumber;
     #endregion
 
     
