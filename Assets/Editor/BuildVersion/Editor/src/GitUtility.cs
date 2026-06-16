@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using UnityEngine.PlayerLoop;
+using static UnityEngine.UI.Image;
 
 public static class GitUtility
 {
@@ -54,6 +55,7 @@ public static class GitUtility
     public static void SetTag(string version)
     {
         RunCommand($"tag {version}");
+        RunCommand($"push origin {version}");
     }
     public static string GetCommit()
     {

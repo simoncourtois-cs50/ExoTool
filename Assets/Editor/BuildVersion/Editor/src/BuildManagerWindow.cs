@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -23,7 +22,7 @@ public class BuildManagerWindow : EditorWindow
         VisualElement root = rootVisualElement;
 
         //VERSION
-        _versionTitle = new Label($"Current Version : {_version}");
+        _versionTitle = new Label($"Current Version : {_currentVersion}");
         root.Add(_versionTitle);
 
         //Major
@@ -149,8 +148,6 @@ public class BuildManagerWindow : EditorWindow
         // GIT
         Label branch = new Label($"Branch : {_branch}");
         root.Add(branch);
-        Label tag = new Label($"Tag : {_tag}");
-        root.Add(tag);
         Label commit = new Label($"Commit : {_commit}");
         root.Add(commit);
         Label status = new Label($"Status : {_status}");
@@ -158,16 +155,34 @@ public class BuildManagerWindow : EditorWindow
     }
     private void handleUpdateButtonClick()
     {
-        _version = $"v{_major}.{_minor}.{_patch}";
-        Debug.Log(GitUtility.GetStatus());
+        _newVersion = $"{_majorNumber.ToString()}.{_minorNumber.ToString()}.{_patchNumber.ToString()}";
+
+        if(_status == "Waiting commit")
+        {
+            EditorUtility.DisplayDialog("Warning", "Commit Before adding a tag", "ok");
+            return;
+        }
+
+        bool authorizeVersionUpdate = EditorUtility.DisplayDialog("Warning - Update Tag", $"Do you want to update version tag from {_currentVersion} to {_newVersion}", "yes", "no");
+        if (authorizeVersionUpdate)
+        {
+            GitUtility.SetTag(_newVersion);
+            _currentVersion = _newVersion;
+            _versionTitle = new Label(_currentVersion);
+        }
     }
     private void UpdateDisplayedVersion()
     {
-        _version = GitUtility.GetTag();
-        string[] versionsNumber = _version.Split(".");
+        _currentVersion = GitUtility.GetTag();
+        string[] versionsNumber = _currentVersion.Split(".");
         _major = versionsNumber[0];
         _minor = versionsNumber[1];
         _patch = versionsNumber[2];
+
+        _majorNumber = Int32.Parse(_major);
+        _minorNumber = Int32.Parse(_minor);
+        _patchNumber = Int32.Parse(_patch);
+
         _branch = GitUtility.GetBranch();
         _commit = GitUtility.GetCommit();
         _status = GitUtility.GetStatus();
@@ -176,12 +191,13 @@ public class BuildManagerWindow : EditorWindow
 
     #region Private and Protected
 
-    private string _version;
+    private string _currentVersion;
     private Label _versionTitle;
     private string _branch;
-    private string _tag;
     private string _commit;
     private string _status;
+
+    private string _newVersion;
 
     private string _major;
     private string _minor;
@@ -190,6 +206,8 @@ public class BuildManagerWindow : EditorWindow
     private int _majorNumber;
     private int _minorNumber;
     private int _patchNumber;
+
+
     #endregion
 
     
