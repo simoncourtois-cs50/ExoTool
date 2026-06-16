@@ -162,18 +162,21 @@ public class BuildManagerWindow : EditorWindow
             EditorUtility.DisplayDialog("Warning", "Commit Before adding a tag", "ok");
             return;
         }
+
         if (_currentVersion == _newVersion)
         {
             EditorUtility.DisplayDialog("Warning", "Versions are identical, update with a superior version", "ok");
             return;
 
         }
+
         bool authorizeVersionUpdate = EditorUtility.DisplayDialog("Warning - Update Tag", $"Do you want to update version tag from {_currentVersion} to {_newVersion}", "yes", "no");
+
         if (authorizeVersionUpdate)
         {
             GitUtility.SetTag(_newVersion);
             _currentVersion = _newVersion;
-            _versionTitle = new Label(_currentVersion);
+            _versionTitle.text = _newVersion;
         }
     }
     private void UpdateDisplayedVersion()
